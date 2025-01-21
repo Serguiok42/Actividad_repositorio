@@ -40,7 +40,7 @@ Repositorio de Github,  grupo Europa 2 lote 10.
    - Después de hacer un <ins>`push`<ins>, podrás ver los cambios reflejados en tu repositorio en GitHub.
 
 
-P:D: En GitHub, puedes subrayar texto utilizando la etiqueta HTML < ins >, los signos < y > debe ir unido al texto que se desea subrayar, sin espacios . Aquí tienes un ejemplo de cómo hacerlo:
+P:D: En GitHub, puedes subrayar texto utilizando la etiqueta HTML < ins >, los signos < y > deben ir unido al texto que se desea subrayar, sin espacios . Aquí tienes un ejemplo de cómo hacerlo:
 
 Este es un <ins>texto subrayado</ins>. 
 
