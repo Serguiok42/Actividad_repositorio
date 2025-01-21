@@ -1,6 +1,6 @@
 # Actividad_repositorio
 Repositorio de Github,  grupo Europa 2 lote 10.
-# Pasos para crear un repositorio en GitHub
+## _Pasos para crear un repositorio en GitHub_
 
 1. **Crear una cuenta en GitHub**
    - Si aún no tienes una cuenta, ve a [https://github.com](https://github.com) y regístrate.
@@ -28,15 +28,21 @@ Repositorio de Github,  grupo Europa 2 lote 10.
      ```
 
 7. **Agregar archivos y realizar cambios**
-   - En tu máquina local, agrega archivos o realiza cambios en el repositorio clonado.
+   - *En tu máquina local, agrega archivos o realiza cambios en el repositorio clonado.*
    - Usa los siguientes comandos de Git para realizar tus cambios:
-     ```bash
-     git add .
-     git commit -m "Mensaje de tu commit"
-     git push origin main
-     ```
+     **```bash**
+      **git add .**
+      **git commit -m "Mensaje de tu commit"**
+      **git push origin main**
+      **```****
 
 8. **Ver tus cambios en GitHub**
-   - Después de hacer un `push`, podrás ver los cambios reflejados en tu repositorio en GitHub.
+   - Después de hacer un <ins>`push`<ins>, podrás ver los cambios reflejados en tu repositorio en GitHub.
+
+
+P:D: En GitHub, puedes subrayar texto utilizando la etiqueta HTML <ins>. Aquí tienes un ejemplo de cómo hacerlo:
+
+Este es un <ins>texto subrayado</ins>. 
+
 
 ¡Listo! Ahora tienes un repositorio en GitHub y puedes comenzar a trabajar en tu proyecto.
