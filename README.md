@@ -1,7 +1,8 @@
 # Actividad_repositorio
 Repositorio de Github,  grupo Europa 2 lote 10.
+Hemos decidido usar este repositorio para mostrar la realización de la tarea grupal de genética clínica y de poblaciones (explicada posteriormente), también hemos decidido seguir usando el repositorio después de la entrega para trabajar conjuntamente en los scripts de las demas actividades grupales. 
 
-# Análisis Genético de la Mutación NC_000023.10:g.38226614G>A
+# Análisis in-sílico de la Mutación NC_000023.10:g.38226614G>A
 
 Este proyecto tiene como objetivo el análisis detallado de una mutación genética específica localizada en el gen **OTC** (Ornithine Carbamoyltransferase), un gen ligado al cromosoma X. La variante en estudio es la **NC_000023.10:g.38226614G>A**, la cual se ha identificado como una mutación missense que cambia la glicina por la arginina en la posición 50 de la proteína OTC.
 
@@ -63,10 +64,4 @@ En un escenario donde los mellizos son varones y la madre es heterocigota para l
 
 Este análisis genético proporciona información valiosa sobre la mutación NC_000023.10:g.38226614G>A en el gen **OTC** y su relación con la enfermedad OTCD. El uso de diversas herramientas bioinformáticas ha permitido predecir el impacto potencial de esta mutación en la función de la proteína y su posible contribución a la aparición de la enfermedad. Además, se ha discutido el patrón de herencia de esta mutación y las probabilidades de que los descendientes hereden la enfermedad.
 
-## Referencias
 
-1. OMIM: Ornithine transcarbamylase deficiency (OTCD)
-2. SIFT y PolyPhen2 para la predicción de patogenicidad
-3. gnomAD para la frecuencia alélica poblacional
-4. Clustal Omega para alineamiento de secuencias
-5. Uniprot para análisis de la proteína OTC
