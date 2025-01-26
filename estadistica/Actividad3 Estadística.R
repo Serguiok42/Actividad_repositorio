@@ -9,11 +9,31 @@ library(stats)   # librería para el PCA
 library(ggplot2) # librería para hacer la representación gráfica
 library(gtsummary) # para dibujar las tablas
 
+### preparación de los datos ###
+
 # Cargar los datos 
-Dataset <- read.csv("C:/Users/CESAR HINOJOSA/Downloads/Dataset5.csv")
+Dataset <- read.csv("C:/Users/CESAR HINOJOSA/Downloads/Dataset expresión genes.csv")
+
+# para ver los nombres de las columnas
+colnames(Dataset)
+
+# Sacar una lista de las columnas que contienen la expresión de los genes y la columnna id
+columnas_genes <- c("id", "AQ_ADIPOQ", "AQ_ALOX5", "AQ_ARG1", "AQ_BMP2", "AQ_CCL2", "AQ_CCL5", "AQ_CCR5", "AQ_CD274",      
+                    "AQ_CD36", "AQ_CHKA", "AQ_CPT1A", "AQ_CSF2", "AQ_CXCR1", "AQ_FASN", "AQ_FOXO3", "AQ_FOXP3", "AQ_G6PD",        
+                    "AQ_IL10", "AQ_IL1B", "AQ_IL6", "AQ_IRS1", "AQ_JAK1", "AQ_JAK3", "AQ_LDHA", "AQ_LIF", "AQ_MAPK1", "AQ_NFE2L2",      
+                    "AQ_NFKB1", "AQ_NLRP3", "AQ_NOS2", "AQ_NOX5", "AQ_PDCD1", "AQ_PPARG", "AQ_PTAFR",       
+                    "AQ_PTGS2", "AQ_SLC2A4", "AQ_SOD1", "AQ_SREBF1", "AQ_STAT3",       
+                    "AQ_TGFB1", "AQ_TLR3", "AQ_TLR4", "AQ_TNF", "AQ_GPD2", "AQ_GPX1", "AQ_IFNG")
+
+
+# Crear un nuevo dataset con solo esas columnas
+Dataset_nuevo <- Dataset[, columnas_genes]
+
+# ver dataset nuevo
+print(Dataset_nuevo)
 
 # Escalar los datos 
-Data_scaled <- scale(Dataset5)
+Data_scaled <- scale(Dataset_nuevo)
 
 # Verificar si las columnas han sido correctamente estandarizadas
 summary(Data_scaled)
