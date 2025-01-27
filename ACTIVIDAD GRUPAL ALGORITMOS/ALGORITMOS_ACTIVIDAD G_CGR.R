@@ -18,6 +18,12 @@ expression_genes <- read_delim("gene_expression.csv", delim = ";", show_col_type
 # Asignar los nombres de las columnas del archivo column_names.txt al dataframe de valores de expresión
 colnames(expression_genes) <- column_names
 
+#Comprobación de columnas vacías
+sumas <- colSums(expression_genes) # sumo los datos por columnas
+columnascero <- names(sumas[sumas==0]) # veo cuantas sumas son == 0
+print(columnascero) # veo qué datos hay que excluir
+Expresión_de_genes_df_final <- expression_genes[, !names(expression_genes) %in% columnascero] # reemplazo el dataset df sin esas columnas
+
 # Existe discrepancia entre los dataframes classes_df y expression_genes
 
 # Eliminar la fila sample_0 en classes_df 
