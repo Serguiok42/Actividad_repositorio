@@ -3,44 +3,46 @@
 ## técnicas de machine learning supervisadas
 ## Freyda Luisa Encarnación Alejandro 
 
-
 ## Cargar los paquetes necesarios
 library(dplyr)
 library(caret)
 library(ggplot2)
 library(randomForest)
 
-## lectura de los datos
+## lectura de los datos y preparación de los datos 
 
-data <- read.csv2("C:/Users/CESAR HINOJOSA/Downloads/gene_expression (1).csv", header = FALSE)
-head(data)
-classes<- read.csv2("C:/Users/CESAR HINOJOSA/Downloads/classes (1).csv",header = FALSE)
-head(classes)
-
+expression_gene <- read.csv2("C:/Users/CESAR HINOJOSA/Downloads/gene_expression.csv", header = FALSE)
+head(expression_gene)
+classes <- read.csv2("C:/Users/CESAR HINOJOSA/Downloads/classes.csv", header=FALSE)
+print(classes)
+                         
 ## Con colnames le asignas los nombres a las columnas, que ya vienen del .txt
-column_names<- "C:/Users/CESAR HINOJOSA/Downloads/column_names.txt"
+column_names <- "C:/Users/CESAR HINOJOSA/Downloads/column_names.txt"
 nombres <- readLines(column_names)
 head(nombres, 10)
-colnames(data) <- nombres
+colnames(expression_gene) <- nombres
+
+#Esto asegurará que rownames tenga la longitud correcta.
+rownames(expression_gene) <- classes$V1[1:nrow(expression_gene)]
 
 ## Rownames es para asignar nombres a las filas y le puse classes V1
 ## para que entendiera que son los que aparecen en la primera columna del data set classes
-rownames(data) <- classes$V1
+rownames(expression_gene) <- classes$V1
 
 ## Luego la columna 2 del data set es la que dice la clase
 ## Y con cbind se agrega esa columna
 columna_clases <- classes$V2
-data <- cbind(data, columna_clases)
-View(data)
+expression_gene <- cbind(expression_gene, columna_clases)
+View(expression_gene)
 
 # Conversión de la columna clases a factor 
-data$columna_clases <- as.factor(data$columna_clases)
+expression_gene$columna_clases <- as.factor(expression_gene$columna_clases)
 
 ## Comprobación de las dimensiones del DataFrame 
-dim(data)
+dim(expression_gene)
 
 ## Convertir la columna de clases a factor, si no está en ese formato
-data$columna_clases <- as.factor(data$columna_clases)
+expression_gene$columna_clases <- as.factor(expression_gene$columna_clases)
 
 ## Para reproducubilidad
 set.seed(42)
