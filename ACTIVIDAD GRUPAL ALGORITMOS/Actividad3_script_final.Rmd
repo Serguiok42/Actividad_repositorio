@@ -49,8 +49,6 @@ head(combined_df)
 
 ```
 
-
-
 ##reduccion de dimensionalidad
 
 ```{r lasso, warning = FALSE, results='hide'}
@@ -79,10 +77,7 @@ selected_features <- which(rowSums(abs(all_coefs[-1,])) != 0)
 
 # Crear nuevo conjunto de datos con características seleccionadas
 data_selected <- combined_df[, c("Class", names(combined_df)[selected_features])]
-
-
 ```
-
 
 
 ## Metodos supervisados
@@ -180,7 +175,75 @@ length(true_classes)
 # Crear la matriz de confusion 
 confusion <- confusionMatrix(predicted_classes, true_classes)
 print(confusion)
-
 probabilities_lda <- predict(lda_model, newdata = testing_data, type = "prob") # Obtener probabilidades
 print(probabilities_lda)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## RDA (Regularized Discriminant Analysis)
+
+Ajuste del modelo RDA al entrenamiento y carga de paquetes para el RDA
+
+```{r cars}
+install.packages ("klaR")
+install.packages ("Metrics")
+library(klaR)
+library(klaR)
+
+rda_model <- rda(formula, data = training_data)
+rda_model
+rda_pred <- predict(rda_model, newdata = training_data)
+(rda_pred)
+summary(cars)
+```
+
+Realizar predicciones sobre el conjunto de prueba
+
+```{r pressure, echo=FALSE}
+rda_predictions <- predict(rda_model, newdata = testing_data)
+(rda_predictions)
+```
+Obtener la predicción (predicciones de la clase)
+
+```{r}
+predicted_classesA <- rda_predictions$class
+predicted_classesA
+```
+
+Comprobacion de que se ha obtenido el mismo numero de predicciones que de los datos de testing
+
+```{r}
+length(predicted_classesA) 
+length (testing_data$Class)
+```
+
+Obtener las verdaderas etiquetas (las clases reales en el conjunto de prueba)
+
+```{r}
+true_classesA <- as.factor(testing_data$class)
+true_classesA
+length(true_classesA)
+```
+
+Crear la matriz de confusión (Clase predicho testing vs. clase real testing)
+
+```{r}
+confusionA <- confusionMatrix(predicted_classesA, true_classesA)
+print(confusionA)
+```
+
+Calcular F1 Score
+
+```{r}
+f1_rda <- F1_Score(testing_data$formula, rda_predictions)
+```
+
+Crear la matriz de confusión como un dataframe para visualizar en R
+
+```{r}
+confusion_matrix_df <- as.data.frame(as.table(confusionA))
+print(confusion_matrix_df)       
 ```
