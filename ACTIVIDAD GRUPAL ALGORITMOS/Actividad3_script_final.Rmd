@@ -191,7 +191,7 @@ Ajuste del modelo RDA al entrenamiento y carga de paquetes para el RDA
 install.packages ("klaR")
 install.packages ("Metrics")
 library(klaR)
-library(klaR)
+library(Metrics)
 
 rda_model <- rda(formula, data = training_data)
 rda_model
