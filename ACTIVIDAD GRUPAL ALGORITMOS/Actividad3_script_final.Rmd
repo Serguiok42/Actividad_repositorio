@@ -42,11 +42,66 @@ head(combined_df)
 ```
 ##Métodos no supervisados
 ```{r lasso, warning = FALSE, results='hide'}
+# Limpiar NA e imputar
+combined_df[] <- lapply(combined_df, function(x) {
+  if (is.numeric(x)) {
+    x[is.na(x)] <- median(x, na.rm = TRUE)  # O puedes usar mean() si prefieres
+  } else if (is.factor(x) || is.character(x)) {
+    moda <- names(sort(table(x), decreasing = TRUE))[1]
+    x[is.na(x)] <- moda
+  }
+  return(x)})
 
+# Verificar si los NA han sido imputados
+sum(is.na(combined_df)) 
 
+# Guardar las clases en un vector separado antes de convertir a matriz
+clases <- combined_df$Class
 
+# Excluir las columnas 'Sample' y 'Class' para preparar la matriz de datos
+combined_df_matrix <- as.matrix(combined_df[, -c(1, 2)])
 
+# Calcular el análisis Isomap
+isomap.results <- Isomap(data = combined_df_matrix, dims = 1:4, k = 5, plotResiduals = TRUE)
 
+# Crear dataframe para la visualización (usando las primeras dos dimensiones)
+isomap.df <- data.frame(isomap.results$dim2)
+
+# Añadir la columna de clases para usarla en la visualización
+isomap.df$clases <- clases
+
+# Graficar los resultados de Isomap
+ggplot(isomap.df, aes(x = X1, y = X2, color = clases)) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("red", "blue", "green", "orange", "purple")) +
+  labs(title = "Isomap", 
+       x = 'dim1', 
+       y = 'dim2', 
+       color = "TIPO") +
+  theme_classic() +
+  theme(panel.grid.major = element_line(color = "gray90"),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "gray95"),
+        plot.title = element_text(hjust = 0.5))
+
+# CLUSTERIZACION K-MEANS 
+# Calcular el parametro k, para estimar cuantos clusteres es más óptimo en este caso
+fviz_nbclust(isomap.df[, 1:2], kmeans, method = "wss") +  # Usamos Isomap para el análisis del codo
+  ggtitle("Optimal number of clusters", subtitle = "") +
+  theme(panel.grid.major = element_line(color = "gray90"),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "gray95"),
+        plot.title = element_text(hjust = 0.5, margin = margin(b = -10)))
+
+# En este caso se fija k = 5
+
+#Calculamos k-means
+kmeans.result <- kmeans(isomap.df[, 1:2], centers = 5, iter.max = 100, nstart = 25)  # Realiza K-means con las dos primeras dimensiones de Isomap
+
+# Visualizar los clusters obtenidos por K-means
+fviz_cluster(kmeans.result, data = isomap.df[, 1:2], xlab = '', ylab = '') +
+  ggtitle("Cluster plot, k = 5", subtitle = "") +
+  theme(plot.title = element_text(hjust = 0.5, margin = margin(b = -10)))
 ```
 
 ##reduccion de dimensionalidad
