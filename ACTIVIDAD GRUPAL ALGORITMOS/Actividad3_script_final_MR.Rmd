@@ -32,18 +32,6 @@ expression_genes <- read_delim("gene_expression.csv", delim = ";", show_col_type
 # Asignar los nombres de las columnas del archivo column_names.txt al dataframe de valores de expresión
 colnames(expression_genes) <- column_names
 
-
-# Limpiar NA e imputar
-expression_genes[] <- lapply(expression_genes, function(x) {
-  if (is.numeric(x)) {
-    x[is.na(x)] <- median(x, na.rm = TRUE)
-  }
-  return(x)
-})
-
-# Verificar si los NA han sido imputados
-sum(is.na(expression_genes)) 
-
 #Comprobación de columnas vacías
 sumas <- colSums(expression_genes) # sumo los datos por columnas
 columnascero <- names(sumas[sumas==0]) # veo cuantas sumas son == 0
