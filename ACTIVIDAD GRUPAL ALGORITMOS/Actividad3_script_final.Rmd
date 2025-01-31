@@ -107,30 +107,30 @@ fviz_cluster(kmeans.result, data = isomap.df[, 1:2], xlab = '', ylab = '') +
 ##reduccion de dimensionalidad
 
 ```{r lasso, warning = FALSE, results='hide'}
-# 1. Remover la columna Sample y convertir Class a factor
+# Removemos la columna Sample y convertimos Class a factor
 combined_df$Class <- as.factor(combined_df$Class)
 x <- as.matrix(combined_df[, !names(combined_df) %in% c("Sample", "Class")])
 y <- combined_df$Class
 
-# 2. Asegurarse que x sea numérica
+# Aseguramos que x sea numérica
 x <- apply(x, 2, as.numeric)
 
+# Seleccionamos características usando Lasso
 set.seed(123)
 cv_lasso <- cv.glmnet(x, y, alpha = 1, family = "multinomial")
 best_lambda <- cv_lasso$lambda.min
-
-# Seleccionar características usando Lasso
 lasso_model <- glmnet(x, y, alpha = 1, lambda = best_lambda, family = "multinomial")
+
 # Obtener coeficientes para todas las clases
 coef_list <- coef(lasso_model)
 
-# Combinar los coeficientes de todas las clases
+# Combinamos los coeficientes de todas las clases
 all_coefs <- do.call(cbind, lapply(coef_list, as.matrix))
 
-# Encontrar características con coeficientes no nulos en cualquier clase
+# Encontramos características con coeficientes no nulos en cualquier clase
 selected_features <- which(rowSums(abs(all_coefs[-1,])) != 0)
 
-# Crear nuevo conjunto de datos con características seleccionadas
+# Creamos nuevo conjunto de datos con las características seleccionadas
 data_selected <- combined_df[, c("Class", names(combined_df)[selected_features])]
 ```
 
@@ -188,7 +188,7 @@ svmModelLineal <- train(Class ~.,
                         prob.model = TRUE) 
 
 
-# Obtener la predicción (predicciones de la clase)
+# Obtenemos las predicciones de las clases
 predicciones_SVM <- predict(svmModelLineal, test_data)
 
 #Creo la matriz de confusión para comparar los datos predichos con los reales.
