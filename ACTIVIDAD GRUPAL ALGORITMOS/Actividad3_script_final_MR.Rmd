@@ -1,0 +1,332 @@
+---
+title: "Resolución Actividad 3 grupal máster Bioinformática UNIR (2024))"
+author: "Sergio Benítez Fernández"
+date: "2025-01-11"
+output: html_document
+---
+
+```{r setup del dataframe, results = "hide", warning = FALSE}
+rm(list=ls())
+
+path <- "C:/Users/Asus/OneDrive/bioinformatica/primer_quatri/algoritmos/actividad 3"
+setwd (path)
+#carga de las libreriaas utilizadas
+library(MASS) # Libreria LDA
+library(glmnet)
+library(e1071)
+library(readr)
+library(caret)
+library(klaR)
+library(Metrics)
+
+classes_df <- read_delim("classes.csv", col_names = c("Sample", "Class"), delim = ";", show_col_types = FALSE)
+
+# Leer el archivo de nombres de columnas
+column_names <- readLines("column_names.txt")
+column_names
+
+# Leer el archivo expression_values.csv
+expression_genes <- read_delim("gene_expression.csv", delim = ";", show_col_types = FALSE)
+
+# Asignar los nombres de las columnas del archivo column_names.txt al dataframe de valores de expresión
+colnames(expression_genes) <- column_names
+
+# Existe discrepancia entre los dataframes classes_df y expression_genes
+
+# Eliminar la fila sample_0 en classes_df 
+classes_df_depurada <- classes_df[classes_df$Sample != "sample_0", ]
+
+# Combinar los dataframes
+combined_df <- cbind(classes_df_depurada, expression_genes)
+
+# Verificar el contenido del dataframe combinado
+head(combined_df)
+
+
+```
+##Métodos no supervisados
+```{r lasso, warning = FALSE, results='hide'}
+# Limpiar NA e imputar
+combined_df[] <- lapply(combined_df, function(x) {
+  if (is.numeric(x)) {
+    x[is.na(x)] <- median(x, na.rm = TRUE)  # O puedes usar mean() si prefieres
+  } else if (is.factor(x) || is.character(x)) {
+    moda <- names(sort(table(x), decreasing = TRUE))[1]
+    x[is.na(x)] <- moda
+  }
+  return(x)})
+
+# Verificar si los NA han sido imputados
+sum(is.na(combined_df)) 
+
+# Guardar las clases en un vector separado antes de convertir a matriz
+clases <- combined_df$Class
+
+# Excluir las columnas 'Sample' y 'Class' para preparar la matriz de datos
+combined_df_matrix <- as.matrix(combined_df[, -c(1, 2)])
+
+# Calcular el análisis Isomap
+isomap.results <- Isomap(data = combined_df_matrix, dims = 1:4, k = 5, plotResiduals = TRUE)
+
+# Crear dataframe para la visualización (usando las primeras dos dimensiones)
+isomap.df <- data.frame(isomap.results$dim2)
+
+# Añadir la columna de clases para usarla en la visualización
+isomap.df$clases <- clases
+
+# Graficar los resultados de Isomap
+ggplot(isomap.df, aes(x = X1, y = X2, color = clases)) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("red", "blue", "green", "orange", "purple")) +
+  labs(title = "Isomap", 
+       x = 'dim1', 
+       y = 'dim2', 
+       color = "TIPO") +
+  theme_classic() +
+  theme(panel.grid.major = element_line(color = "gray90"),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "gray95"),
+        plot.title = element_text(hjust = 0.5))
+
+# CLUSTERIZACION K-MEANS 
+# Calcular el parametro k, para estimar cuantos clusteres es más óptimo en este caso
+fviz_nbclust(isomap.df[, 1:2], kmeans, method = "wss") +  # Usamos Isomap para el análisis del codo
+  ggtitle("Optimal number of clusters", subtitle = "") +
+  theme(panel.grid.major = element_line(color = "gray90"),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "gray95"),
+        plot.title = element_text(hjust = 0.5, margin = margin(b = -10)))
+
+# En este caso se fija k = 5
+
+#Calculamos k-means
+kmeans.result <- kmeans(isomap.df[, 1:2], centers = 5, iter.max = 100, nstart = 25)  # Realiza K-means con las dos primeras dimensiones de Isomap
+
+# Visualizar los clusters obtenidos por K-means
+fviz_cluster(kmeans.result, data = isomap.df[, 1:2], xlab = '', ylab = '') +
+  ggtitle("Cluster plot, k = 5", subtitle = "") +
+  theme(plot.title = element_text(hjust = 0.5, margin = margin(b = -10)))
+```
+
+##reduccion de dimensionalidad
+
+```{r lasso, warning = FALSE, results='hide'}
+# Removemos la columna Sample y convertimos Class a factor
+combined_df$Class <- as.factor(combined_df$Class)
+x <- as.matrix(combined_df[, !names(combined_df) %in% c("Sample", "Class")])
+y <- combined_df$Class
+
+# Aseguramos que x sea numérica
+x <- apply(x, 2, as.numeric)
+
+# Seleccionamos características usando Lasso
+set.seed(123)
+cv_lasso <- cv.glmnet(x, y, alpha = 1, family = "multinomial")
+best_lambda <- cv_lasso$lambda.min
+lasso_model <- glmnet(x, y, alpha = 1, lambda = best_lambda, family = "multinomial")
+
+# Obtener coeficientes para todas las clases
+coef_list <- coef(lasso_model)
+
+# Combinamos los coeficientes de todas las clases
+all_coefs <- do.call(cbind, lapply(coef_list, as.matrix))
+
+# Encontramos características con coeficientes no nulos en cualquier clase
+selected_features <- which(rowSums(abs(all_coefs[-1,])) != 0)
+
+# Creamos nuevo conjunto de datos con las características seleccionadas
+data_selected <- combined_df[, c("Class", names(combined_df)[selected_features])]
+```
+
+
+## Metodos supervisados
+
+```{r división de la base de datos, error=TRUE, warning=FALSE, message=FALSE}
+# Dividir el conjunto de datos en conjuntos de entrenamiento y prueba
+set.seed (123) #Determinamos la semilla de aleatoriedad
+trainIndex <- createDataPartition(data_selected$Class, p = 0.8, list = FALSE) #Division de los datos 80% para entrenar, 20% para test)
+
+train_data <- data_selected[trainIndex,] #Datos para entrenar el modelo
+test_data <- data_selected[-trainIndex,] #Datos para testearlo (los contrarios al de entreno)
+
+table(train_data$Class) #Tabla con el numero de muestras para cada tipo de clase para los datos de entreno
+table(test_data$Class)#Tabla con el numero de muestras para cada tipo de clase para los datos de test 
+
+numerical_columns <- train_data[, sapply(train_data, is.numeric)] #Seleccionamos todos los datos numericos
+scaled_data <- scale(numerical_columns) #Escalado de los datos seleccionados
+scaled_data <- as.data.frame(scaled_data)
+training_data <-  cbind(scaled_data, Class = train_data$Class) #Creacion de tabla con los datos escalados + columna de diagnosis
+
+numerical_columns <- test_data[, sapply(test_data, is.numeric)] #Seleccionamos todos los datos numericos
+scaled_data <- scale(numerical_columns) #Escalado de los datos seleccionados
+scaled_data <- scale(numerical_columns) #Escalado de los datos seleccionados
+scaled_data <- as.data.frame(scaled_data)
+testing_data <- cbind(scaled_data, Class = test_data$Class) #Creacion de tabla con los datos escalados + columna de diagnosis
+
+
+training_data <- as.data.frame(training_data)
+testing_data <- as.data.frame(testing_data)
+
+training_data$Class <- as.factor (train_data$Class)
+testing_data$Class <- as.factor (test_data$Class)
+
+# Crear la formula sumando cada gen
+length(training_data) #Para saber cuantas variables se encuentran
+names <- colnames(training_data[1:100]) #La variable clases no se incluye
+formula <- as.formula(paste("Class ~", paste(names, collapse = "+"))) #Se obtiene la formula del diagnosis junto a la suma de todos los parametros
+formula
+
+```
+
+
+## SVM lineal
+
+```{r SVM lineal, error=TRUE, warning=FALSE, message=FALSE, echo = TRUE}
+#SVM lineal
+svmModelLineal <- train(Class ~.,
+                        data = training_data,
+                        method = "svmLinear",
+                        trControl = trainControl(method = "cv", number = 10),
+                        preProcess = c("center", "scale"),
+                        tuneGrid = expand.grid(C = seq(0, 2, length = 20)), 
+                        prob.model = TRUE) 
+
+
+# Obtenemos las predicciones de las clases
+predicciones_SVM <- predict(svmModelLineal, test_data)
+
+#Creo la matriz de confusión para comparar los datos predichos con los reales.
+confusion_matrix_SVM <- confusionMatrix(predicciones_SVM, testing_data$Class)
+
+#obtengo matriz de confusión,y saco datos como la precisión, sensibilidad, especificidad y score-F1 para las distintas clases 
+confusion_matrix_SVM
+```
+
+
+```{r SVM lineal, error=TRUE, warning=FALSE, message=FALSE}
+precision_SVM <- confusion_matrix_SVM$overall['Accuracy']
+precision_SVM
+
+sensitivity_SVM <- as.numeric(confusion_matrix_SVM$byClass[, "Sensitivity"])
+sensitivity_SVM
+
+specificity_SVM <- as.numeric(confusion_matrix_SVM$byClass[, "Specificity"])
+specificity_SVM
+
+f1_score_SVM <- as.numeric(confusion_matrix_SVM$byClass[,'F1'])
+f1_score_SVM
+
+```
+## LDA
+
+```{r LDA, warning = FALSE,echo = FALSE}
+# Ajuste del modelo LDA en el entrenamiento
+lda_model <- lda(formula, data = training_data) 
+lda_model$scaling # contribuciones/coeficientes
+
+
+lda_pred <- predict(lda_model, newdata = training_data)
+lda_pred$x
+
+# Realizar predicciones sobre el conjunto de prueba
+lda_predictions <- predict(lda_model, newdata = testing_data)
+lda_predictions$x
+
+# Obtener la predicción (predicciones de la clase)
+predicted_classes <- lda_predictions$class
+predicted_classes
+
+#Comprobacion de que se ha obtenido el mismo numero de predicciones que de los datos de testing
+length(predicted_classes) 
+length (testing_data$Class)
+
+# Obtener las verdaderas etiquetas (las clases reales en el conjunto de prueba)
+true_classes <- as.factor(testing_data$Class)
+true_classes
+length(true_classes)
+```
+
+
+```{r matrix LDA, warning = FALSE,echo = TRUE}
+# Crear la matriz de confusion 
+confusion_matrix_LDA <- confusionMatrix(predicted_classes, true_classes)
+
+#Imprimir la matriz de confusion
+print(confusion_matrix_LDA)
+```
+
+
+```{r matrix LDA, warning = FALSE,echo = TRUE}
+#Muestra el numero de Precision 
+precision_LDA <- confusion_matrix_LDA$overall['Accuracy']
+precision_LDA
+
+#Muestra el numero de Sensibilidad
+sensitivity_LDA <- as.numeric(confusion_matrix_LDA$byClass[, "Sensitivity"])
+sensitivity_LDA
+
+#Muestra el numero de Especificidad
+specificity_LDA <- as.numeric(confusion_matrix_LDA$byClass[, "Specificity"])
+specificity_LDA
+
+#Muestra el F1-Score
+f1_score_LDA <- as.numeric(confusion_matrix_LDA$byClass[,'F1'])
+f1_score_LDA
+
+```
+
+
+
+## RDA (Regularized Discriminant Analysis)
+
+Ajuste del modelo RDA al entrenamiento y carga de paquetes para el RDA
+
+```{r RDA preprocesamiento, echo = FALSE}
+library(klaR)
+library(Metrics)
+
+rda_model <- rda(formula, data = training_data)
+rda_model
+rda_pred <- predict(rda_model, newdata = training_data)
+(rda_pred)
+summary(cars)
+
+#Realizar predicciones sobre el conjunto de prueba
+rda_predictions <- predict(rda_model, newdata = testing_data)
+(rda_predictions)
+
+#Obtener la predicción (predicciones de la clase)
+predicted_classes <- rda_predictions$class
+predicted_classes
+
+#Comprobacion de que se ha obtenido el mismo numero de predicciones que de los datos de testing
+length(predicted_classes) 
+length (testing_data$Class)
+
+#Obtener las verdaderas etiquetas (las clases reales en el conjunto de prueba)
+true_classes <- as.factor(testing_data$Class)
+true_classes
+length(true_classes)
+```
+
+
+```{r matrix RDA, echo = TRUE}
+# Crear la matriz de confusion 
+confusion_matrix_RDA <- confusionMatrix(predicted_classes, true_classes)
+
+#Imprimir la matriz de confusion
+print(confusion_matrix_RDA)
+```
+
+
+```{r F1 Score RDA, echo = TRUE}
+#Muestra el F1-Score
+f1_score_RDA <- as.numeric(confusion_matrix_RDA$byClass[,'F1'])
+f1_score_RDA
+```
+
+
+```{r matrix RDA, echo = FALSE}
+#Crear la matriz de confusión como un dataframe para visualizar en R
+confusion_matrix_RDA <- as.data.frame(as.table(confusion_matrix_RDA))
+```
