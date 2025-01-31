@@ -194,8 +194,20 @@ predicciones_SVM <- predict(svmModelLineal, test_data)
 #Creo la matriz de confusión para comparar los datos predichos con los reales.
 confusion_matrix_SVM <- confusionMatrix(predicciones_SVM, testing_data$Class)
 
+#obtengo matriz de confusión,y saco datos como la precisión, sensibilidad, especificidad y score-F1 para las distintas clases 
 confusion_matrix_SVM
 
+precision_SVM <- confusion_matrix_SVM$overall['Accuracy']
+precision_SVM
+
+sensitivity_SVM <- as.numeric(confusion_matrix_SVM$byClass[, "Sensitivity"])
+sensitivity_SVM
+
+specificity_SVM <- as.numeric(confusion_matrix_SVM$byClass[, "Specificity"])
+specificity_SVM
+
+f1_score_SVM <- as.numeric(confusion_matrix_SVM$byClass[,'F1'])
+f1_score_SVM
 
 ```
 ## LDA
