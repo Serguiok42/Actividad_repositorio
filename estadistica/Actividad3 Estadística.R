@@ -45,6 +45,17 @@ Pca_result <- prcomp(Data_scaled, center = TRUE, scale. = TRUE)
 summary(Pca_result)
 
 
+## Tabla de la contribucion de cada cada gen por componentes
+
+# Matriz de cargas para ver la contribución de cada gen a los componentes
+Pca_result$rotation
+
+# Convertir la matriz de cargas en un dataframe
+tabla_cargas <- as.data.frame(Pca_result$rotation)
+
+# elimina la primera fila "id" a todas las columnas del dataframe tabla_cargas
+tabla_cargas_1 <- tabla_cargas[-1, ]
+print(tabla_cargas_1)
 
 ### Graficos de la varianza acumulada y explicada de cada componente ###
 
