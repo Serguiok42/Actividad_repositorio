@@ -45,6 +45,18 @@ Pca_result <- prcomp(Data_scaled, center = TRUE, scale. = FALSE)
 summary(Pca_result)
 
 
+## Tabla de carga de la contribucion de cada gen por componentes
+
+# Matriz de cargas (contribución de cada gen a los componentes)
+Pca_result$rotation
+
+# Convertir la matriz de cargas en un data frame
+tabla_cargas <- as.data.frame(Pca_result$rotation)
+
+# elimina la primera fila a todas las columnas del dataframe tabla_cargas
+tabla_cargas_1 <- tabla_cargas[-1, ]
+print(tabla_cargas_1)
+
 
 ### Graficos de la varianza acumulada y explicada de cada componente ###
 
@@ -108,7 +120,6 @@ ggplot(Pca_data, aes(x = PC1, y = PC2)) +
   theme_minimal()
 
 
-
 ### Tabla resumen con la varianza explicada y la varianza acumulada por cada componente ###
 
 # Crear una tabla con la varianza explicada y acumulada por cada componente
@@ -120,32 +131,6 @@ variance_table <- data.frame(
 # Ver tabla resumen
 print(variance_table)
 
-
-
-### tabla descriptiva con la media y sd de la varianza acumulada y la varianza explicada ###
-
-# Calcular media y desviación estándar de la varianza acumulada y explicada
-mean_explained_variance <- mean(variance_table$Varianza_Explicada)
-sd_explained_variance <- sd(variance_table$Varianza_Explicada)
-mean_cumulative_variance <- mean(variance_table$Varianza_Acumulada)
-sd_cumulative_variance <- sd(variance_table$Varianza_Acumulada)
-
-# Agregar la media y la desviación estándar calculadas a un resumen
-cat("\nTabla Resumen de Varianza Explicada y Acumulada\n")
-cat("Varianza Explicada - Media:", mean_explained_variance, "Desviación Estándar:", sd_explained_variance, "\n")
-cat("Varianza Acumulada - Media:", mean_cumulative_variance, "Desviación Estándar:", sd_cumulative_variance, "\n")
-
-# Crear tabla descriptiva con gtsummary con la media y sd de la varianza acumulada 
-# y la varianza explicada
-variance_summary <- variance_table %>%
-  tbl_summary(
-    by = NULL,  # No dividir por ningún grupo
-    missing = "no",  # Excluir filas con valores faltantes
-    statistic = all_continuous() ~ "{mean} ({sd})"  # Mostrar la media y la desviación estándar
-  )
-
-# Ver tabla descriptiva
-View(variance_summary)
 
 # Cargar librerías necesarias
 library(dplyr)
