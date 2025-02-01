@@ -8,6 +8,10 @@ setwd(path)
 library(stats)   # librería para el PCA
 library(ggplot2) # librería para hacer la representación gráfica
 library(gtsummary) # para dibujar las tablas
+library(nnet)
+library(broom)
+library(gt)
+library(dplyr)
 
 ### preparación de los datos ###
 
