@@ -175,3 +175,38 @@ tabla_descriptiva <- Dataset_final %>%
 # Mostrar la tabla
 tabla_descriptiva
 
+##parte 5
+
+# Necesitamos que la variable metástasis sea binomial, (si = clase 1/no = clase 0) asi que creo una nueva columna usando los datos de la variable extensión.
+Dataset_Regresion <- Dataset %>%
+  mutate(metastasis = ifelse(extension == "metastasico", 1, 0))
+
+
+# Uno los datos con las variables clínicas y la nueva variable metastasis
+data_final_Regresion <- cbind(Dataset_Regresion[, c("metastasis", "edad", "sexo", "tumor")], Pca_data)
+
+# convierto la variable metastasis y terciles a factor
+data_final_Regresion$metastasis <- as.factor(data_final_Regresion$metastasis)
+data_final_Regresion$PC1_tercil <- as.factor(data_final_Regresion$PC1_tercil)
+data_final_Regresion$PC2_tercil <- as.factor(data_final_Regresion$PC2_tercil)
+data_final_Regresion$PC3_tercil <- as.factor(data_final_Regresion$PC3_tercil)
+
+# Aplico el modelo de regresión logística
+model <- glm(metastasis ~ PC1_tercil + PC2_tercil + PC3_tercil + edad + sexo + tumor, 
+             data = data_final_Regresion, 
+             family = "binomial")
+
+# Creo la tabla con OR, IC 95% y p-value
+table_results_Regresion <- tidy(model, exponentiate = TRUE) %>% 
+  mutate(`IC 95%` = paste0(round(exp(confint.default(model)[, 1]), 2), " - ", round(exp(confint.default(model)[, 2]), 2))) %>%
+  select(term, estimate, `IC 95%`, p.value)
+
+# Formateo la tabla usando gt
+table_results_Regresion %>%
+   gt() %>%
+  tab_header(title = md("**Tabla de Regresión Logística**"),
+             subtitle = "Metástasis (Sí/No) por terciles de PCA") %>%
+  fmt_number(columns = c(estimate, p.value), decimals = 3) %>%
+  cols_label(term = "Variable", estimate = "OR", `IC 95%` = "IC 95%", p.value = "P-valor") %>%
+  opt_table_outline() 
+
