@@ -293,10 +293,17 @@ tabla_descriptiva_combinada <- tbl_merge(
 )
 
 # Modificar el título superior de la tabla combinada
-tabla_combinada <- tabla_combinada %>%
+tabla_combinada <- tabla_descriptiva_combinada %>%
   modify_caption("**Componentes principales**")
 
-print(tabla_combinada) #TABLA CON LOS TERCILES Y P-VALUES DE LOS COMPONENES PRINCIPALES 1 Y 2
+tabla_combinada_gt <- as_gt(tabla_combinada)
+
+tabla_combinada_gt <- tabla_combinada_gt %>%
+  tab_source_note(
+    source_note = "Tabla estadistica. Analisis estadisticos de los diferentes genes por terciles para los componentes principales 1 y 2.   Los valores estadisticos se encuentran representados por la media y la desviacion estandard y los rangos intercuartilicos (p25-p75). 
+    Uso de Kruskal-Wallis como prueba estadistica. Los p-values < 0.05 se encuentran destacados en negrita")
+    
+tabla_combinada_gt
 
 
 
