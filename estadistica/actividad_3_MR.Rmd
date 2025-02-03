@@ -316,6 +316,19 @@ tabla_combinada_gt <- tabla_combinada_gt %>%
     
 tabla_combinada_gt
 ```
+Respecto a la tabla descriptiva (Figura 8), esta tabla representa las estadísticas descriptivas de los valores sin transformar de cada una de las variables por terciles, representados como tercil 1 (T1), tercil 2 (T2) y tercil 3(T3), dentro de los componentes 1 y 2. Primeramente, se puede observar como todas las variables se encuentran representadas por la media y la desviación estándar para cada tercil de cada componente principal, siendo por tanto una distribución normal. 
+
+En este análisis estadístico se formularon las siguientes hipótesis:
+
+Hipótesis nula (H₀): No existen diferencias significativas en la expresión génica entre las diferentes agrupaciones por terciles para el determinado componente principal.
+
+Hipótesis alternativa (H₁): Existen diferencias significativas en la expresión génica entre los diferentes terciles para un mismo componente principal.
+
+Un valor p menor a 0,05 respalda la hipótesis alternativa, indicando la existencia de diferencias significativas en la expresión génica del gen analizado según el tercil dentro de un componente principal específico.
+
+Los resultados muestran que la gran mayoría de variables presentan un valor p significativo en ambos componentes principales, favoreciendo por tanto diferencias significativas en la expresión génica entre los terciles de los componentes principales 1 y 2. 
+
+Variables como AQ_ADIPOQ o AQ_NOX5 no presentan diferencias significativas en la expresión génica entre los terciles en ninguno de los 2 componentes principales. Por otro lado, AQ_SLC2A4 solo presenta diferencias significativas en el PC2, mientras que AQ_CSF2, AQ_IL6, AQ_NOS2 y AQ_IFNG, sólo en el PC1.
 
 **3. Modelo de regresión logística**
 
