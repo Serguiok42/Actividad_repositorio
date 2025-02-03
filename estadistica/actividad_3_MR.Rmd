@@ -311,7 +311,7 @@ tabla_combinada_gt <- as_gt(tabla_combinada)
 
 tabla_combinada_gt <- tabla_combinada_gt %>%
   tab_source_note(
-    source_note = "Figura 8. Tabla estadistica. Análisis estadístico de los diferentes genes por terciles para los componentes principales 1 y 2.   Los valores estadísticos se encuentran representados por la media y la desviación estandard y los rangos intercuartilicos (p25-p75). 
+    source_note = "Figura 8. Tabla estadistica. Análisis estadístico de los diferentes genes por terciles (T1, T2 y T3) para los componentes principales 1 y 2.   Los valores estadísticos se encuentran representados por la media y la desviación estandard y los rangos intercuartilicos (p25-p75). 
     Uso de Kruskal-Wallis como prueba estadística. Los p-values < 0.05 se encuentran destacados en negrita.")
     
 tabla_combinada_gt
