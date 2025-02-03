@@ -119,7 +119,10 @@ ggplot(variance_df, aes(x = Componente, y = varianza_explicada)) +
 ```
 **Figura 1.** Gráfico correspondiente a la varianza explicada por componente principal.
 
-
+Vemos que con solo los primeros tres componentes principales, puedes retener una proporción significativa (más del 60%) de la varianza, lo que es bastante bueno para reducir la dimensionalidad sin perder demasiada información.
+PC1 es el componente más importante, explicando más del 50% de la varianza.
+Los primeros 2-3 componentes explican una proporción considerable de la varianza, y puedes reducir el número de dimensiones manteniendo solo estos primeros componentes.
+A partir de PC7 en adelante, la varianza explicada por cada componente es marginal y no aporta mucha información relevante.
 
 ```{r varianza acumulada, warning = FALSE, echo = FALSE}
 # Calcular la varianza acumulada
@@ -146,6 +149,7 @@ ggplot(cumulative_df, aes(x = Componente, y = Varianza_Acumulada)) +
 ```
 **Figura 2.** Gráfico correspondiente a la varianza acumulada de los diferentes componentes principales.
 
+El gráfico resultante muestra cómo la varianza acumulada aumenta conforme agregas componentes principales. De acuerdo con los valores de R², se espera que la varianza acumulada suba rápidamente al principio (especialmente por el PC1) y luego se estabilice o suba más lentamente a medida que se agregan más componentes.
 
 ```{r PCA grafico, echo = FALSE}
 ### Gráfico de dispersión de los primeros dos componentes principales  ###
@@ -165,6 +169,9 @@ ggplot(Pca_data, aes(x = PC1, y = PC2)) +
 ```
 **Figura 3.** Gráfico de dispersion de los componentes principales 1 y 2. 
 
+El gráfico de dispersión de los primeros dos componentes principales (PC1 y PC2) muestra cómo se distribuyen los datos a lo largo de las dimensiones más importantes de variabilidad. El eje PC1 captura la mayor parte de la varianza, mientras que PC2 captura menos. Este tipo de visualización permite identificar patrones o agrupaciones en los datos, así como detectar valores atípicos. Si los puntos están bien dispersos o forman grupos, podría indicar que existen estructuras o clusters en los datos. En resumen, es una herramienta para explorar la estructura subyacente y la variabilidad de los datos reducidos a dos dimensiones.
+
+
 ```{r tabla varianza, include=FALSE}
 ### Tabla resumen con la varianza explicada y la varianza acumulada por cada componente ###
 
@@ -174,9 +181,22 @@ variance_table <- data.frame(
   Varianza_Explicada = explained_variance,
   Varianza_Acumulada = cumulative_variance
 )
-
+# Tabla de las varianzas
+variance_table %>%
+  tbl_summary(
+    by = NULL,  # No agrupar
+    missing = "no",  # Ignorar valores faltantes
+    statistic = list(all_continuous() ~ "{mean} ({sd})"),
+    digits = all_continuous() ~ 2
+  )
 
 ```
+**figura 4.** Tabla de la varianza acumulada y la varianza explicada por cada componente
+
+La varianza explicada media por el componente es 0.02, lo que indica que el componente en promedio explica un 2% de la varianza en los datos. La desviación estándar de 0.08 sugiere que esta varianza explicada puede variar bastante entre los diferentes casos de la muestra. Es posible que en algunos casos, la varianza explicada sea mucho más baja o más alta.
+
+Vemos que la varianza acumulada media es 0.92, lo que significa que este componente, junto con los anteriores (si se consideran varios), explica en promedio el 92% de la varianza total en los datos. La desviación estándar de 0.12 muestra que la varianza acumulada varía en torno a este valor, lo que sugiere que la cantidad de varianza explicada por los primeros componentes podría variar algo entre las observaciones.
+
 
 ```{r graficos eigen, echo = FALSE, warning=FALSE}
 ###########FUNCIONES EXTRA PARA LA GENERACIÓN DE GRÁFICOS y OBTENCIÓN DE INFORMACIÓN RELEVANTE########
@@ -186,7 +206,7 @@ eigenvalues <- fviz_eig(Pca_result, addlabels = TRUE, ylim = c(0, 50))
 eigenvalues # los eigenvalues (valores propios) miden el nivel de estiramiento o encogimiento de sus vectores asociados tras la transformació de los datos (PCA). 
             # Por tanto, a mayor magnitud del valor propio (%)  su  dirección asociada (vector propio) mayor  información importante contiene.En nuestro contexto, a mayor eigenvalue mayor información de los datos (varianza explicada) contiene la dimension del PCA  .
 ```
-**Figura 4.** Porcentaje de varianza explicada para cada componente principal.
+**Figura 5.** Porcentaje de varianza explicada para cada componente principal.
 
 Los eigenvalues (valores propios) miden el nivel de estiramiento o encogimiento de sus vectores asociados tras la transformació de los datos (PCA). 
 
@@ -211,7 +231,7 @@ correlación_var_PC1y3
 # la longitud de las flechas indican el grad de correlaciión de la variable con la dimensión. En este caso a tener tantas variables es difíl distinguirlas, ya que los títulos se solapan, pero esta gráfica nos permite ver que variablles (genes) están más relacionados unos con otros. 
 # ```
 ```
-**Figura 6.** Gráfico de correlación y visualización de las diferentes variables con los componentes principales 1 y 3. 
+**Figura 7.** Gráfico de correlación y visualización de las diferentes variables con los componentes principales 1 y 3. 
 
 Prácticamente todos los genes se correlación positivamente con la dimensión 1. Para la dimensión 2 más o menos la mitad de las variables se correlación positivamente y la mitad negativamente (algo similar ocurre para la dimensión 3 (PC3)).
 
@@ -227,7 +247,7 @@ correlación_var_COs2 <- fviz_pca_var(Pca_result, col.var = "cos2",
                                      repel = TRUE) # evitar el overlapping
 correlación_var_COs2
 ```
-**Figura 7.** Gráfico de correlación de las variables por el coseno (cos2) respecto a los componentes principales 1 y 2
+**Figura 8.** Gráfico de correlación de las variables por el coseno (cos2) respecto a los componentes principales 1 y 2
 
 **2. Tabla descriptiva**
 
@@ -386,7 +406,7 @@ table_results_Regresion %>%
   cols_label(term = "Variable", estimate = "OR", `IC 95%` = "IC 95%", p.value = "P-valor") %>%
   opt_table_outline() 
 ```
-**Figura 9.** Tabla de regresión logística: Esta tabla contiene los valores OR y p-valores asociados a las variables predictoras (primera columna de la izquierda) con respecto a la variable dependiente (variable de respuesta binaria: presencia o no de metástasis)
+**Figura 10.** Tabla de regresión logística: Esta tabla contiene los valores OR y p-valores asociados a las variables predictoras (primera columna de la izquierda) con respecto a la variable dependiente (variable de respuesta binaria: presencia o no de metástasis)
 
 Interpretación de resultados:
 
