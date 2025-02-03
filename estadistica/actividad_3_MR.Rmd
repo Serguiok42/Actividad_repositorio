@@ -351,11 +351,26 @@ data_final_Regresion$metastasis <- as.factor(data_final_Regresion$metastasis)
 data_final_Regresion$PC1_tercil <- as.factor(data_final_Regresion$PC1_tercil)
 data_final_Regresion$PC2_tercil <- as.factor(data_final_Regresion$PC2_tercil)
 data_final_Regresion$PC3_tercil <- as.factor(data_final_Regresion$PC3_tercil)
+data_final_Regresion$sexo <- as.factor(data_final_Regresion$sexo)
+data_final_Regresion$tumor <- as.factor(data_final_Regresion$tumor)
+
+table(data_final_Regresion$metastasis)
+table(data_final_Regresion$PC1_tercil)
+table(data_final_Regresion$PC2_tercil)
+table(data_final_Regresion$PC3_tercil)
+table(data_final_Regresion$sexo)
+table(data_final_Regresion$tumor)
 
 # Aplico el modelo de regresión logística
 model <- glm(metastasis ~ PC1_tercil + PC2_tercil + PC3_tercil + edad + sexo + tumor, 
              data = data_final_Regresion, 
              family = "binomial")
+summary(model)
+confint(model) # intervalo de confianza
+
+exp(model$coefficients) # las OR
+exp(coef(model)) # las OR
+exp(confint(model)) # intervalo de confianza de las OR
 
 # Creo la tabla con OR, IC 95% y p-value
 table_results_Regresion <- tidy(model, exponentiate = TRUE) %>% 
@@ -370,6 +385,5 @@ table_results_Regresion %>%
   fmt_number(columns = c(estimate, p.value), decimals = 3) %>%
   cols_label(term = "Variable", estimate = "OR", `IC 95%` = "IC 95%", p.value = "P-valor") %>%
   opt_table_outline() 
-
 ```
 **Figura 9.** Tabla de regresión logística (explicar un poco la tabla y sus caracteristicas)
